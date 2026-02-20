@@ -1,0 +1,36 @@
+[Unit]
+# SafeKid Flash Service - Systemd Unit
+# Jalankan launcher backend server saat boot
+# Dependencies: Network (wait-online), TimeSync
+Description=SafeKid Flash Launcher Server
+After=network-online.target time-sync.target
+Wants=network-online.target
+
+[Service]
+# Konfigurasi User & Group
+# Sebaiknya gunakan user khusus 'safekid', tapi bisa root di live environment
+User=safekid
+Group=safekid
+
+# Environment Variables
+Environment=SAFEKID_HOME=/opt/safekid
+Environment=SAFEKID_CONFIG=/etc/safekid/safekid.conf
+# Environment=DISPLAY=:0  # Tidak perlu DISPLAY untuk backend, tapi perlu jika browser
+
+# Working Directory
+WorkingDirectory=/opt/safekid
+
+# Command utama (ExecStart)
+# Pastikan path python benar (bisa /usr/bin/python3 atau venv)
+ExecStart=/usr/bin/python3 -m safekid.kid_ui.launcher_server --config /etc/safekid/safekid.conf
+
+# Restart Policy
+Restart=on-failure
+RestartSec=5s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1274 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeKid Flash 🌟</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ===== CSS VARIABLES & RESET ===== */
+    :root {
+      --bg-start: #0f0c29;
+      --bg-mid: #302b63;
+      --bg-end: #24243e;
+      --card-bg: rgba(255, 255, 255, 0.08);
+      --card-border: rgba(255, 255, 255, 0.15);
+      --card-hover: rgba(255, 255, 255, 0.15);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.75);
+      --accent-yellow: #FFD93D;
+      --accent-pink: #FF6B9D;
+      --accent-blue: #4ECDC4;
+      --accent-purple: #A855F7;
+      --accent-orange: #FF8C42;
+      --accent-green: #6BCB77;
+      --timer-danger: #FF4757;
+      --timer-warning: #FFA502;
+      --timer-ok: #2ED573;
+      --glow-strength: 0 0 30px;
+      --radius-lg: 24px;
+      --radius-xl: 36px;
+      --transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+      min-height: 100vh;
+      color: var(--text-primary);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ===== ANIMATED BACKGROUND STARS ===== */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--duration, 3s) ease-in-out infinite;
+      opacity: 0;
+    }
+
+    @keyframes twinkle {
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+
+      50% {
+        opacity: var(--max-opacity, 0.8);
+        transform: scale(1);
+      }
+    }
+
+    /* ===== FLOATING ORBS ===== */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(60px);
+      z-index: 0;
+      animation: floatOrb 8s ease-in-out infinite;
+    }
+
+    .orb-1 {
+      width: 400px;
+      height: 400px;
+      background: rgba(168, 85, 247, 0.2);
+      top: -100px;
+      left: -100px;
+    }
+
+    .orb-2 {
+      width: 300px;
+      height: 300px;
+      background: rgba(78, 205, 196, 0.2);
+      bottom: -50px;
+      right: -50px;
+      animation-delay: -4s;
+    }
+
+    .orb-3 {
+      width: 250px;
+      height: 250px;
+      background: rgba(255, 107, 157, 0.15);
+      top: 40%;
+      left: 30%;
+      animation-delay: -2s;
+    }
+
+    @keyframes floatOrb {
+
+      0%,
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      33% {
+        transform: translate(30px, -20px) scale(1.05);
+      }
+
+      66% {
+        transform: translate(-20px, 30px) scale(0.95);
+      }
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    /* ===== TOP BAR ===== */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 14px 24px;
+    }
+
+    .topbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      font-size: 32px;
+      animation: logoFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes logoFloat {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(-5deg);
+      }
+
+      50% {
+        transform: translateY(-6px) rotate(5deg);
+      }
+    }
+
+    .logo-text {
+      font-family: 'Fredoka One', cursive;
+      font-size: 22px;
+      background: linear-gradient(90deg, var(--accent-yellow), var(--accent-pink), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .topbar-greeting {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .topbar-greeting strong {
+      color: var(--accent-yellow);
+      font-size: 17px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .date-badge {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .admin-btn {
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      border-radius: 12px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-purple);
+      transition: var(--transition);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .admin-btn:hover {
+      background: rgba(168, 85, 247, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(168, 85, 247, 0.3);
+    }
+
+    /* ===== MAIN GRID ===== */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    /* ===== LEFT PANEL: TIMER ===== */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Timer Card */
+    .timer-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-xl);
+      padding: 28px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timer-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(78, 205, 196, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .timer-label {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    /* SVG Ring Timer */
+    .timer-ring-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 16px;
+    }
+
+    .timer-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .timer-ring-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.1);
+      stroke-width: 10;
+    }
+
+    .timer-ring-progress {
+      fill: none;
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 565.48;
+      /* 2 * pi * 90 */
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+    }
+
+    .timer-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .timer-emoji {
+      font-size: 36px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .timer-digits {
+      font-family: 'Fredoka One', cursive;
+      font-size: 38px;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .timer-unit {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-secondary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .timer-message {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      min-height: 20px;
+    }
+
+    /* Progress bar mini */
+    .progress-bar-container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 100px;
+      height: 8px;
+      margin-top: 16px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 1s linear, background 0.5s;
+    }
+
+    /* ===== STREAK / STATS CARD ===== */
+    .stats-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .stats-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-item {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Fredoka One', cursive;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* ===== MOTIVATIONAL QUOTE ===== */
+    .quote-card {
+      background: linear-gradient(135deg, rgba(255, 217, 61, 0.12), rgba(255, 107, 157, 0.12));
+      border: 1px solid rgba(255, 217, 61, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+    }
+
+    .quote-text {
+      font-size: 14px;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--accent-yellow);
+      line-height: 1.5;
+    }
+
+    .quote-author {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    /* ===== RIGHT PANEL: APP GRID ===== */
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 22px;
+    }
+
+    .section-subtitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-left: auto;
+    }
+
+    /* Category Tabs */
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cat-tab {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 100px;
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cat-tab.active,
+    .cat-tab:hover {
+      background: rgba(78, 205, 196, 0.2);
+      border-color: rgba(78, 205, 196, 0.4);
+      color: var(--accent-blue);
+      transform: translateY(-2px);
+    }
+
+    /* App Grid */
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 14px;
+    }
+
+    .app-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 20px 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .app-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--app-gradient, linear-gradient(135deg, transparent, transparent));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .app-card:hover::before {
+      opacity: 1;
+    }
+
+    .app-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: var(--app-color, rgba(255, 255, 255, 0.3));
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), var(--glow-strength) var(--app-color, rgba(255, 255, 255, 0.1));
+    }
+
+    .app-card:active {
+      transform: translateY(-4px) scale(0.98);
+    }
+
+    .app-icon {
+      font-size: 52px;
+      display: block;
+      margin-bottom: 10px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .app-icon {
+      font-size: 54px;
+      margin-bottom: 24px;
+      transition: var(--transition);
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.25));
+      /* Memastikan emoji ter-render dengan font sistem yang benar */
+      font-family: 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI', sans-serif;
+      line-height: 1.2;
+    }
+
+    .app-card:hover .app-icon {
+      transform: scale(1.2) rotate(5deg);
+    }
+
+    .app-name {
+      font-family: 'Fredoka One', cursive;
+      font-size: 16px;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+
+    .app-desc {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .app-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--app-color, rgba(255, 255, 255, 0.2));
+      border-radius: 100px;
+      padding: 2px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    /* ===== RECENT ACTIVITY ===== */
+    .activity-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+    }
+
+    .activity-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+    }
+
+    .activity-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .activity-text {
+      font-size: 13px;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .activity-time {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    /* ===== TIME'S UP OVERLAY ===== */
+    .timesup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+
+    .timesup-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .timesup-card {
+      background: linear-gradient(135deg, #1a0533, #330a1a);
+      border: 2px solid var(--timer-danger);
+      border-radius: var(--radius-xl);
+      padding: 50px 60px;
+      text-align: center;
+      box-shadow: 0 0 60px rgba(255, 71, 87, 0.4);
+      animation: pulse-danger 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-danger {
+
+      0%,
+      100% {
+        box-shadow: 0 0 60px rgba(255, 71, 87, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 100px rgba(255, 71, 87, 0.7);
+      }
+    }
+
+    .timesup-emoji {
+      font-size: 80px;
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .timesup-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 48px;
+      color: var(--timer-danger);
+      margin-bottom: 8px;
+    }
+
+    .timesup-sub {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    /* ===== APP LAUNCH TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(30, 30, 50, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 100px;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ===== LOADING DOTS ===== */
+    .loading-dots {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .loading-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: dot-bounce 1.4s ease-in-out infinite;
+    }
+
+    .loading-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .loading-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes dot-bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0.5);
+        opacity: 0.4;
+      }
+
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .left-panel {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .timer-card {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .apps-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .left-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar-greeting {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background -->
+  <div class="stars" id="stars"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Times Up Overlay -->
+  <div class="timesup-overlay" id="timesupOverlay">
+    <div class="timesup-card">
+      <span class="timesup-emoji">⏰</span>
+      <div class="timesup-title">Waktu Habis!</div>
+      <div class="timesup-sub">Sudah waktunya istirahat dulu, ya! 😊<br>Minta Papa/Mama untuk buka kunci.</div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span id="toastIcon">🚀</span>
+    <span id="toastMsg">Membuka aplikasi...</span>
+  </div>
+
+  <div class="page-wrapper">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-logo">
+        <span class="logo-icon">🛡️</span>
+        <span class="logo-text">SafeKid Flash</span>
+      </div>
+      <div class="topbar-greeting">
+        Halo, <strong id="childName">Budi</strong>! Semangat belajar hari ini! ✨
+      </div>
+      <div class="topbar-right">
+        <div class="date-badge" id="dateDisplay">—</div>
+        <a href="/parent" class="admin-btn" id="adminBtn">
+          🔑 <span>Orang Tua</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+
+      <!-- LEFT: TIMER + STATS -->
+      <div class="left-panel">
+
+        <!-- Timer Card -->
+        <div class="timer-card">
+          <div class="timer-label">⏳ Sisa Waktu Main</div>
+
+          <div class="timer-ring-container">
+            <svg class="timer-svg" viewBox="0 0 200 200">
+              <circle class="timer-ring-bg" cx="100" cy="100" r="90" />
+              <circle class="timer-ring-progress" id="timerRing" cx="100" cy="100" r="90" />
+            </svg>
+            <div class="timer-center">
+              <span class="timer-emoji" id="timerEmoji">⏰</span>
+              <div class="timer-digits" id="timerDisplay" style="color: var(--timer-ok)">90:00</div>
+              <div class="timer-unit">menit·detik</div>
+            </div>
+          </div>
+
+          <div class="timer-message" id="timerMessage">Selamat bermain! 🎉</div>
+
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBar"
+              style="width:100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));"></div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-card">
+          <div class="stats-title">📊 Statistik Hari Ini</div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value" style="color: var(--accent-yellow)">🔥 <span id="streakDays">5</span></div>
+              <div class="stat-label">Hari Berturut</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" style="color: var(--accent-green)"><span id="appsUsed">3</span></div>
+              <div class="stat-label">App Dibuka</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" style="color: var(--accent-blue)"><span id="timeUsed">45m</span></div>
+              <div class="stat-label">Sudah Dipakai</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" style="color: var(--accent-pink)">⭐ <span id="stars">12</span></div>
+              <div class="stat-label">Bintang</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Motivational Quote -->
+        <div class="quote-card">
+          <div class="quote-text" id="quoteText">"Belajar satu hal baru setiap hari!"</div>
+          <div class="quote-author" id="quoteAuthor">— Tips SafeKid Flash ✨</div>
+        </div>
+
+      </div><!-- end left-panel -->
+
+      <!-- RIGHT: APPS -->
+      <div class="right-panel">
+
+        <div class="section-header">
+          <div class="section-title">🎮 Pilih Aktivitas</div>
+          <div class="section-subtitle" id="appCount">10 aplikasi tersedia</div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs" id="categoryTabs">
+          <div class="cat-tab active" data-cat="all" onclick="filterApps('all', this)">🌟 Semua</div>
+          <div class="cat-tab" data-cat="edu" onclick="filterApps('edu', this)">📚 Belajar</div>
+          <div class="cat-tab" data-cat="game" onclick="filterApps('game', this)">🎮 Main</div>
+          <div class="cat-tab" data-cat="creative" onclick="filterApps('creative', this)">🎨 Kreatif</div>
+          <div class="cat-tab" data-cat="web" onclick="filterApps('web', this)">🌐 Internet</div>
+        </div>
+
+        <!-- Apps Grid -->
+        <div class="apps-grid" id="appsGrid">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-card">
+          <div class="activity-title">⚡ Aktivitas Terakhir</div>
+          <div class="activity-list" id="activityList">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+
+      </div><!-- end right-panel -->
+
+    </div><!-- end main-grid -->
+  </div><!-- end page-wrapper -->
+
+  <script>
+    // ===================================================
+    //  STATE (synced from server)
+    // ===================================================
+    let _remainSec = 2700;   // fallback 45min
+    let _totalSec = 5400;   // fallback 90min
+    let _appsCache = [];     // all apps from API
+    let _activeFilter = 'all';
+    let _appsUsed = 0;
+    let _stars = 0;
+    let _streak = 1;
+    let _timerInterval = null;
+
+    const QUOTES = [
+      { text: "Belajar satu hal baru setiap hari!", author: "Tips SafeKid Flash" },
+      { text: "Imajinasi lebih penting dari pengetahuan!", author: "Albert Einstein" },
+      { text: "Setiap hari adalah kesempatan baru untuk belajar!", author: "Tips SafeKid Flash" },
+      { text: "Bermain sambil belajar adalah cara terbaik!", author: "Tips SafeKid Flash" },
+      { text: "Kamu bisa melakukan hal-hal luar biasa! 🚀", author: "SafeKid Flash" },
+      { text: "Rajin belajar rajin menabung bintang! ⭐", author: "SafeKid Flash" },
+      { text: "Baca buku hari ini, jadi pintar esok hari!", author: "Tips SafeKid Flash" },
+    ];
+
+    // ===================================================
+    //  INIT
+    // ===================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      initStars();
+      updateDate();
+      setInterval(updateDate, 60000);
+      randomQuote();
+      fetchStatus(true);       // initial fetch — sets timer values
+      fetchApps();             // load apps catalog from server
+      startLocalTimer();       // tick every second locally
+      setInterval(fetchStatus, 10000);   // re-sync from server every 10s
+      setInterval(fetchActivity, 15000); // refresh activity log
+    });
+
+    // ===================================================
+    //  FETCH STATUS FROM SERVER
+    // ===================================================
+    function fetchStatus(isInit = false) {
+      fetch('/api/status')
+        .then(r => r.json())
+        .then(d => {
+          if (isInit || Math.abs(d.remaining_seconds - _remainSec) > 3) {
+            // Sync if this is first load, or drift > 3 seconds
+            _remainSec = d.remaining_seconds;
+            _totalSec = d.total_seconds;
+          }
+          _stars = d.stars ?? _stars;
+          _streak = d.streak_days ?? _streak;
+
+          document.getElementById('childName').textContent = d.child_name || 'Anak';
+          document.getElementById('streakDays').textContent = _streak;
+          document.getElementById('stars').textContent = _stars;
+
+          if (isInit) updateTimerDisplay();
+
+          // Detect time's up from server
+          if (d.remaining_seconds <= 0) showTimesUp();
+        })
+        .catch(() => { });
+    }
+
+    function fetchActivity() {
+      fetch('/api/activity')
+        .then(r => r.json())
+        .then(log => {
+          if (!log || !log.length) return;
+          _appsUsed = log.length;
+          document.getElementById('appsUsed').textContent = Math.min(_appsUsed, 99);
+          renderActivityFromLog(log.slice(0, 4));
+        })
+        .catch(() => { });
+    }
+
+    // ===================================================
+    //  FETCH APPS FROM CATALOG API
+    // ===================================================
+    function fetchApps() {
+      fetch('/api/apps')
+        .then(r => r.json())
+        .then(d => {
+          _appsCache = d.apps || [];
+          buildCategoryTabs(d.categories || {});
+          renderApps('all');
+        })
+        .catch(() => {
+          // Fallback: show friendly message
+          document.getElementById('appsGrid').innerHTML =
+            '<div style="color:rgba(255,255,255,0.5);font-size:14px;font-weight:700;padding:20px;grid-column:1/-1;">⚠️ Katalog aplikasi tidak tersedia<br><small>Pastikan server berjalan.</small></div>';
+        });
+    }
+
+    // ===================================================
+    //  CATEGORY TABS — built from API response
+    // ===================================================
+    function buildCategoryTabs(categories) {
+      const tabsEl = document.getElementById('categoryTabs');
+      const allTab = `<div class="cat-tab active" data-cat="all" onclick="filterApps('all',this)">🌟 Semua</div>`;
+      const catTabs = Object.entries(categories).map(([key, cat]) =>
+        `<div class="cat-tab" data-cat="${key}" onclick="filterApps('${key}',this)">${cat.icon} ${cat.label}</div>`
+      ).join('');
+      tabsEl.innerHTML = allTab + catTabs;
+    }
+
+    // ===================================================
+    //  RENDER APPS GRID
+    // ===================================================
+    function renderApps(category) {
+      _activeFilter = category;
+      const filtered = category === 'all'
+        ? _appsCache
+        : _appsCache.filter(a => a.category === category);
+
+      document.getElementById('appCount').textContent = `${filtered.length} aplikasi tersedia`;
+
+      if (!filtered.length) {
+        document.getElementById('appsGrid').innerHTML =
+          '<div style="color:rgba(255,255,255,0.4);font-size:14px;font-weight:700;padding:20px;grid-column:1/-1;">😔 Tidak ada app di kategori ini</div>';
+        return;
+      }
+
+      const gradient = a => a.gradient ||
+        `linear-gradient(135deg, ${hexToRgba(a.color || '#4ECDC4', 0.15)}, transparent)`;
+
+      document.getElementById('appsGrid').innerHTML = filtered.map(a => `
+        <div class="app-card" id="app-${a.id}"
+             style="--app-color: ${a.color}; --app-gradient: ${gradient(a)};"
+             onclick="launchApp('${a.id}','${escapeSingle(a.name)}','${a.icon}')"
+             title="${escapeSingle(a.description || a.name)}">
+          <span class="app-badge" style="background:${a.color}">${a.badge}</span>
+          <span class="app-icon">${a.icon}</span>
+          <div class="app-name">${a.name}</div>
+          <div class="app-desc">${a.description || ''}</div>
+          ${!a.launchable ? '<div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:4px">🌐 Buka di browser</div>' : ''}
+        </div>
+      `).join('');
+    }
+
+    function filterApps(cat, btn) {
+      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderApps(cat);
+    }
+
+    // ===================================================
+    //  LAUNCH APP
+    // ===================================================
+    function launchApp(id, name, icon) {
+      _appsUsed++;
+      _stars++;
+      document.getElementById('appsUsed').textContent = _appsUsed;
+      document.getElementById('stars').textContent = _stars;
+
+      // Optimistic UI: add to activity
+      const now = new Date();
+      const t = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      prependActivity({ icon, name, time_str: t });
+
+      // Show app-card launch animation
+      const card = document.getElementById('app-' + id);
+      if (card) {
+        card.style.transform = 'scale(0.92)';
+        setTimeout(() => card.style.transform = '', 300);
+      }
+
+      showToast(`${icon} Membuka ${name}...`);
+
+      fetch('/api/launch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ app_id: id, name, icon })
+      })
+        .then(r => r.json())
+        .then(d => {
+          if (!d.ok && d.message) {
+            showToast(`⚠️ ${d.message}`, '⚠️');
+          }
+          if (d.stars) {
+            _stars = d.stars;
+            document.getElementById('stars').textContent = _stars;
+          }
+        })
+        .catch(() => { });
+    }
+
+    // ===================================================
+    //  LOCAL TIMER (ticks every 1 second)
+    // ===================================================
+    function startLocalTimer() {
+      updateTimerDisplay();
+      _timerInterval = setInterval(() => {
+        if (_remainSec <= 0) {
+          clearInterval(_timerInterval);
+          showTimesUp();
+          return;
+        }
+        _remainSec--;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(_remainSec / 60);
+      const secs = _remainSec % 60;
+
+      document.getElementById('timerDisplay').textContent =
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+      // Update used time display
+      const usedMins = Math.floor((_totalSec - _remainSec) / 60);
+      document.getElementById('timeUsed').textContent = `${usedMins}m`;
+
+      const ratio = _totalSec > 0 ? _remainSec / _totalSec : 0;
+      const circumference = 2 * Math.PI * 90;  // r=90
+
+      const ring = document.getElementById('timerRing');
+      const display = document.getElementById('timerDisplay');
+      const progress = document.getElementById('progressBar');
+      const msgEl = document.getElementById('timerMessage');
+      const emoji = document.getElementById('timerEmoji');
+
+      ring.style.strokeDashoffset = circumference * (1 - ratio);
+
+      let color, barBg, emojiChar, msg;
+      if (ratio > 0.5) {
+        color = 'var(--timer-ok)'; barBg = 'linear-gradient(90deg,#4ECDC4,#6BCB77)';
+        emojiChar = '😊'; msg = 'Selamat bermain! 🎉';
+      } else if (ratio > 0.25) {
+        color = 'var(--timer-warning)'; barBg = 'linear-gradient(90deg,#FFA502,#FFD93D)';
+        emojiChar = '⏰'; msg = 'Waktu semakin sedikit, ya!';
+      } else if (ratio > 0.1) {
+        color = 'var(--timer-danger)'; barBg = 'linear-gradient(90deg,#FF4757,#FF8C42)';
+        emojiChar = '⚠️'; msg = 'Segera selesaikan aktivitasmu!';
+      } else {
+        color = '#FF4757'; barBg = '#FF4757';
+        emojiChar = '🔴'; msg = 'Hampir habis! Simpan pekerjaanmu!';
+      }
+
+      display.style.color = color;
+      ring.style.stroke = color;
+      progress.style.width = `${ratio * 100}%`;
+      progress.style.background = barBg;
+      emoji.textContent = emojiChar;
+      msgEl.textContent = msg;
+    }
+
+    function showTimesUp() {
+      document.getElementById('timesupOverlay').classList.add('show');
+    }
+
+    // ===================================================
+    //  ACTIVITY
+    // ===================================================
+    const _activityLog = [];
+    const COLORS = ['var(--accent-blue)', 'var(--accent-pink)', 'var(--accent-green)', 'var(--accent-yellow)'];
+
+    function prependActivity(entry) {
+      _activityLog.unshift(entry);
+      if (_activityLog.length > 4) _activityLog.pop();
+      renderActivityFromLog(_activityLog);
+    }
+
+    function renderActivityFromLog(log) {
+      const el = document.getElementById('activityList');
+      if (!log.length) {
+        el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;font-weight:600;text-align:center;padding:12px">Belum ada aktivitas hari ini</div>';
+        return;
+      }
+      el.innerHTML = log.map((a, i) => `
+        <div class="activity-item">
+          <div class="activity-dot" style="background:${COLORS[i % 4]}"></div>
+          <span style="font-size:16px">${a.icon || '🔵'}</span>
+          <div class="activity-text">${a.name}</div>
+          <div class="activity-time">${a.time_str}</div>
+        </div>
+      `).join('');
+    }
+
+    // ===================================================
+    //  TOAST
+    // ===================================================
+    let _toastTimer = null;
+    function showToast(msg, icon = '🚀') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      document.getElementById('toastIcon').textContent = icon;
+      toast.classList.add('show');
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    // ===================================================
+    //  QUOTES
+    // ===================================================
+    function randomQuote() {
+      const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+      document.getElementById('quoteText').textContent = `"${q.text}"`;
+      document.getElementById('quoteAuthor').textContent = `— ${q.author} ✨`;
+      setTimeout(randomQuote, 30000);
+    }
+
+    // ===================================================
+    //  STARS / DATE
+    // ===================================================
+    function initStars() {
+      const container = document.getElementById('stars');
+      for (let i = 0; i < 60; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 3 + 1;
+        star.style.cssText = `
+          width:${size}px;height:${size}px;
+          top:${Math.random() * 100}%;left:${Math.random() * 100}%;
+          --duration:${Math.random() * 4 + 2}s;
+          --max-opacity:${Math.random() * 0.7 + 0.2};
+          animation-delay:${Math.random() * 5}s;
+        `;
+        container.appendChild(star);
+      }
+    }
+
+    function updateDate() {
+      const now = new Date();
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+      document.getElementById('dateDisplay').textContent =
+        `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+    }
+
+    // ===================================================
+    //  HELPERS
+    // ===================================================
+    function hexToRgba(hex, alpha) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+    function escapeSingle(s) {
+      return String(s).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+    }
+  </script>
+
+</body>
+
+</html>
