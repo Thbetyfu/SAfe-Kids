@@ -3,7 +3,7 @@
     {
       "id": "gcompris",
       "name": "GCompris",
-      "icon": "🔢",
+      "icon": "\uD83D\uDD22",
       "description": "100+ aktivitas edukasi: matematika, sains, membaca, dan logika",
       "category": "edu",
       "color": "#4ECDC4",
@@ -18,7 +18,7 @@
     {
       "id": "tuxpaint",
       "name": "Tux Paint",
-      "icon": "🎨",
+      "icon": "\uD83C\uDFA8",
       "description": "Program melukis yang menyenangkan untuk anak-anak",
       "category": "creative",
       "color": "#FF6B9D",
@@ -33,7 +33,7 @@
     {
       "id": "tuxtype",
       "name": "Tux Typing",
-      "icon": "⌨️",
+      "icon": "\u2328\uFE0F",
       "description": "Belajar mengetik dengan cara yang menyenangkan bersama Tux",
       "category": "edu",
       "color": "#A855F7",
@@ -48,7 +48,7 @@
     {
       "id": "scratch",
       "name": "Scratch",
-      "icon": "🐱",
+      "icon": "\uD83D\uDC31",
       "description": "Platform coding visual untuk anak-anak dari MIT",
       "category": "edu",
       "color": "#FF8C42",
@@ -63,7 +63,7 @@
     {
       "id": "minetest",
       "name": "Minetest",
-      "icon": "⛏️",
+      "icon": "\u26CF\uFE0F",
       "description": "Game sandbox open-source seperti Minecraft — bebas & aman",
       "category": "game",
       "color": "#6BCB77",
@@ -78,7 +78,7 @@
     {
       "id": "ktouch",
       "name": "KTouch",
-      "icon": "⌨️",
+      "icon": "\u2328\uFE0F",
       "description": "Belajar mengetik 10 jari dengan metode terstruktur",
       "category": "edu",
       "color": "#4ECDC4",
@@ -93,7 +93,7 @@
     {
       "id": "childsplay",
       "name": "Childsplay",
-      "icon": "🎯",
+      "icon": "\uD83C\uDFAF",
       "description": "Kumpulan game edukasi untuk anak balita dan TK",
       "category": "game",
       "color": "#FFD93D",
@@ -108,7 +108,7 @@
     {
       "id": "youtube_kids",
       "name": "YouTube Kids",
-      "icon": "📺",
+      "icon": "\uD83D\uDCFA",
       "description": "Video YouTube yang aman dan difilter khusus untuk anak",
       "category": "web",
       "color": "#FF4757",
@@ -123,7 +123,7 @@
     {
       "id": "wikipedia",
       "name": "Wikipedia Anak",
-      "icon": "📖",
+      "icon": "\uD83D\uDCD6",
       "description": "Ensiklopedia online terpercaya — versi sederhana untuk anak",
       "category": "web",
       "color": "#A855F7",
@@ -138,7 +138,7 @@
     {
       "id": "musescore",
       "name": "MuseScore",
-      "icon": "🎵",
+      "icon": "\uD83C\uDFB5",
       "description": "Belajar membaca dan menulis notasi musik",
       "category": "creative",
       "color": "#FF6B9D",
@@ -153,7 +153,7 @@
     {
       "id": "inkscape",
       "name": "Inkscape",
-      "icon": "✏️",
+      "icon": "\u270F\uFE0F",
       "description": "Software desain grafis profesional gratis",
       "category": "creative",
       "color": "#FF8C42",
@@ -168,7 +168,7 @@
     {
       "id": "chess",
       "name": "Catur Online",
-      "icon": "♟️",
+      "icon": "\u265F\uFE0F",
       "description": "Belajar dan bermain catur — melatih strategi dan konsentrasi",
       "category": "game",
       "color": "#FFD93D",
@@ -182,9 +182,25 @@
     }
   ],
   "categories": {
-    "edu":      { "label": "Belajar",  "icon": "📚", "color": "#4ECDC4" },
-    "game":     { "label": "Main",     "icon": "🎮", "color": "#FFD93D" },
-    "creative": { "label": "Kreatif",  "icon": "🎨", "color": "#FF6B9D" },
-    "web":      { "label": "Internet", "icon": "🌐", "color": "#A855F7" }
+    "edu": {
+      "label": "Belajar",
+      "icon": "\uD83D\uDCDA",
+      "color": "#4ECDC4"
+    },
+    "game": {
+      "label": "Main",
+      "icon": "\uD83C\uDFAE",
+      "color": "#FFD93D"
+    },
+    "creative": {
+      "label": "Kreatif",
+      "icon": "\uD83C\uDFA8",
+      "color": "#FF6B9D"
+    },
+    "web": {
+      "label": "Internet",
+      "icon": "\uD83C\uDF10",
+      "color": "#A855F7"
+    }
   }
 }

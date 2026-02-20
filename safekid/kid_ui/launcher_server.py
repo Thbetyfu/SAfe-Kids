@@ -15,9 +15,11 @@ Opsi lengkap:
 
 import argparse
 import configparser
+import hashlib
 import json
 import logging
 import os
+import secrets
 import sys
 import threading
 import time
@@ -75,7 +77,8 @@ class AppState:
         self.stars          = 0
         self.lb_url         = "http://localhost:5555"
         self.demo_mode      = True
-        self.admin_pin      = "1234"
+        # SHA256 of "1234"
+        self.admin_pin_hash = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
         self.activity_log   = []    # [{icon, name, time, app_id}]
         self._lock          = threading.Lock()
         self._start_time    = time.time()
@@ -118,6 +121,15 @@ class AppState:
             }
 
 STATE   = AppState()
+
+def hash_pin(pin_text: str) -> str:
+    """Return SHA256 hash of the PIN."""
+    return hashlib.sha256(pin_text.encode("utf-8")).hexdigest()
+
+def verify_pin(input_pin: str) -> bool:
+    """Check input PIN against stored hash."""
+    if not input_pin: return False
+    return hash_pin(input_pin) == STATE.admin_pin_hash
 LAUNCHER = None   # AppsLauncher instance — set in main()
 
 # ────────────────────────────────────────────────────
@@ -601,7 +613,7 @@ def parent_dashboard():
 def api_admin_status():
     """Extended status for parent dashboard (PIN protected)."""
     pin = request.headers.get("X-SafeKid-PIN") or (request.get_json(silent=True) or {}).get("pin")
-    if pin != STATE.admin_pin:
+    if not verify_pin(pin):
         return jsonify({"error": "Wrong PIN"}), 403
     return jsonify({
         **STATE.to_dict(),
@@ -616,7 +628,7 @@ def api_admin_set_time():
     """Parent: kontrol waktu (add / set total / end session)."""
     data = request.get_json(silent=True) or {}
     pin  = data.get("pin") or request.headers.get("X-SafeKid-PIN")
-    if pin != STATE.admin_pin:
+    if not verify_pin(pin):
         return jsonify({"error": "Wrong PIN"}), 403
 
     with STATE._lock:
@@ -641,7 +653,7 @@ def api_admin_toggle_app():
     """Parent: enable/disable an app."""
     data    = request.get_json(silent=True) or {}
     pin     = data.get("pin") or request.headers.get("X-SafeKid-PIN")
-    if pin != STATE.admin_pin:
+    if not verify_pin(pin):
         return jsonify({"error": "Wrong PIN"}), 403
 
     app_id  = data.get("app_id")
@@ -664,6 +676,61 @@ def not_found(e):
 
 
 # ────────────────────────────────────────────────────
+#  Setup Wizard
+# ────────────────────────────────────────────────────
+def run_setup(config_path):
+    """Interactive setup wizard to set secure PIN."""
+    print("🔐 SafeKid Flash — Security Setup")
+    print("====================================")
+    
+    while True:
+        try:
+            line1 = input("Masukkan PIN Orang Tua baru (4-8 digit): ")
+            new_pin = line1.strip()
+        except EOFError:
+            return
+
+        if not new_pin.isdigit() or len(new_pin) < 4:
+            print("❌ PIN harus berupa angka minimal 4 digit.")
+            continue
+            
+        try:
+            line2 = input("Konfirmasi PIN: ")
+            confirm = line2.strip()
+        except EOFError:
+            return
+
+        if new_pin != confirm:
+            print("❌ PIN tidak cocok. Coba lagi.")
+            continue
+            
+        break
+    
+    # Calculate hash
+    p_hash = hash_pin(new_pin)
+    
+    # Save to config
+    conf = configparser.ConfigParser()
+    if os.path.exists(config_path):
+        conf.read(config_path)
+    
+    if not conf.has_section("general"):
+        conf.add_section("general")
+        
+    conf.set("general", "admin_pin_hash", p_hash)
+    # Remove plain pin if exists
+    if conf.has_option("general", "admin_pin"):
+        conf.remove_option("general", "admin_pin")
+        
+    try:    
+        with open(config_path, "w") as f:
+            conf.write(f)
+        print(f"✅ PIN berhasil disimpan! Hash: {p_hash[:8]}...")
+    except Exception as e:
+        print(f"❌ Gagal menyimpan config: {e}")
+
+
+# ────────────────────────────────────────────────────
 #  Main
 # ────────────────────────────────────────────────────
 
@@ -672,6 +739,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="SafeKid Flash Launcher Server v2")
     parser.add_argument("--config",         default=str(SAFEKID_ROOT / "config" / "safekid_default.conf"))
+    parser.add_argument("--setup",          action="store_true", help="Run initial setup wizard")
     parser.add_argument("--child-name",     default=None)
     parser.add_argument("--child-age",      type=int, default=None)
     parser.add_argument("--port",           type=int, default=None)
@@ -679,8 +747,14 @@ def main():
     parser.add_argument("--used-minutes",   type=int, default=0)
     parser.add_argument("--lb-url",         default=None)
     parser.add_argument("--demo",           action="store_true")
-    parser.add_argument("--pin",            default=None)
+    # --pin removed from CLI for security, use config or setup
     args = parser.parse_args()
+
+    # 0. Setup Mode
+    if args.setup:
+        run_setup(args.config)
+        return
+
 
     # 1. Load defaults from config file
     conf = configparser.ConfigParser()
@@ -712,7 +786,10 @@ def main():
     
     STATE.lb_url        = args.lb_url     or get_conf("little_brother", "server_url", "http://localhost:5555")
     STATE.demo_mode     = args.demo or not HAS_REQUESTS
-    STATE.admin_pin     = args.pin        or get_conf("general", "admin_pin", "1234")
+    
+    # Load PIN Hash
+    # Priority: Config > Default Hash (1234)
+    STATE.admin_pin_hash = get_conf("general", "admin_pin_hash", STATE.admin_pin_hash)
 
     # Init launcher
     if HAS_LAUNCHER and CATALOG_PATH.exists():
@@ -722,20 +799,26 @@ def main():
     else:
         logger.warning("AppsLauncher not available — using catalog fallback")
 
-    print("\n" + "=" * 55)
-    print("  🛡️  SafeKid Flash Launcher Server v2")
-    print("=" * 55)
-    print(f"  👦 Child          : {STATE.child_name} (usia {STATE.child_age})")
-    print(f"  ⏰ Time Today     : {STATE.used_minutes}/{STATE.total_minutes} menit")
-    print(f"  🔗 Little Brother : {STATE.lb_url}")
-    print(f"  🎭 Demo Mode      : {STATE.demo_mode}")
-    print(f"  🔑 Admin PIN      : {STATE.admin_pin}")
-    print(f"  📱 Apps Catalog   : {CATALOG_PATH.exists()}")
-    print("=" * 55)
-    print(f"\n  🌐 Kid UI    → http://localhost:{port}/")
-    print(f"  👨‍👩‍👧 Parent   → http://localhost:{port}/parent")
-    print(f"  📡 API       → http://localhost:{port}/api/status")
-    print("=" * 55 + "\n")
+    # ASCII-safe banner (avoids UnicodeEncodeError on Windows console)
+    sep = "=" * 55
+    def _p(msg=""):
+        try: print(msg)
+        except UnicodeEncodeError: print(msg.encode("ascii", "replace").decode())
+
+    _p("\n" + sep)
+    _p("  [*] SafeKid Flash Launcher Server v2")
+    _p(sep)
+    _p(f"  [>] Child          : {STATE.child_name} (usia {STATE.child_age})")
+    _p(f"  [>] Time Today     : {STATE.used_minutes}/{STATE.total_minutes} menit")
+    _p(f"  [>] Little Brother : {STATE.lb_url}")
+    _p(f"  [>] Demo Mode      : {STATE.demo_mode}")
+    _p(f"  [>] Admin PIN Hash : {STATE.admin_pin_hash[:12]}...  (use --setup to change)")
+    _p(f"  [>] Apps Catalog   : {CATALOG_PATH.exists()}")
+    _p(sep)
+    _p(f"\n  [URL] Kid UI  -> http://localhost:{port}/")
+    _p(f"  [URL] Parent  -> http://localhost:{port}/parent")
+    _p(f"  [URL] API     -> http://localhost:{port}/api/status")
+    _p(sep + "\n")
 
     # Background threads
     if STATE.demo_mode:

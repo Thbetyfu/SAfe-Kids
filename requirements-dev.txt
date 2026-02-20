@@ -1,0 +1,12 @@
+# Production Dependencies
+-r requirements.txt
+
+# Development & Testing Standard
+pytest>=7.4.0
+pytest-cov>=4.1.0
+flake8>=6.1.0
+mypy>=1.5.0
+black>=23.7.0
+
+# Build Tools
+pyinstaller>=6.0.0
