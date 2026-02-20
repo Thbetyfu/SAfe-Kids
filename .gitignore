@@ -21,8 +21,13 @@ build/
 # ─── Testing ──────────────────────────────────────
 .pytest_cache/
 htmlcov/
+docs/coverage/
 .coverage
 *.cover
+
+# ─── Runtime Files ────────────────────────────────
+safekid.log
+config/.update_cache
 
 # ─── SafeKid Runtime Data ─────────────────────────
 # Jangan commit blocklist & custom domain (besar & personal)

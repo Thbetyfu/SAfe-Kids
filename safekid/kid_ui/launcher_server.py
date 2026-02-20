@@ -44,7 +44,7 @@ try:
     HAS_LAUNCHER = True
 except ImportError:
     HAS_LAUNCHER = False
-    print("⚠️  AppsLauncher not found — using basic mode")
+    logger.warning("AppsLauncher not found — using basic mode")
 
 try:
     import requests as req_lib
@@ -52,13 +52,39 @@ try:
 except ImportError:
     HAS_REQUESTS = False
 
-# ── Logging ───────────────────────────────────────
+# ── Logging: dual handler (file + console) ────────────────────
+LOG_FILE = SAFEKID_ROOT / "safekid.log"
+
+_log_handlers = [logging.StreamHandler()]
+try:
+    _log_handlers.append(logging.FileHandler(str(LOG_FILE), encoding="utf-8"))
+except Exception:
+    pass  # Bukan masalah fatal jika file log tidak bisa dibuat
+
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    datefmt="%H:%M:%S"
+    format="%(asctime)s [%(levelname)-8s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+    handlers=_log_handlers,
 )
 logger = logging.getLogger("safekid.server")
+
+# ── Import i18n & updater ─────────────────────────────────────
+try:
+    from safekid.i18n import t, set_lang
+    HAS_I18N = True
+except ImportError:
+    HAS_I18N = False
+    def t(key, **kwargs): return key  # no-op fallback
+    def set_lang(lang): pass
+
+try:
+    from safekid.updater import check_update, CURRENT_VERSION
+    HAS_UPDATER = True
+except ImportError:
+    HAS_UPDATER = False
+    CURRENT_VERSION = "0.6.0"
+    def check_update(**kw): return {"update_available": False, "message": "updater N/A"}
 
 # ── Flask App ─────────────────────────────────────
 app = Flask(__name__, static_folder=str(HERE))
@@ -672,7 +698,59 @@ def serve_theme(filename):
 
 @app.errorhandler(404)
 def not_found(e):
-    return jsonify({"error": "Not found", "hint": "Try / or /parent"}), 404
+    logger.warning(f"404 Not Found: {request.method} {request.url}")
+    return jsonify({
+        "error": "Endpoint tidak ditemukan",
+        "hint":  "Coba: / atau /parent atau /api/status",
+        "code":  404,
+    }), 404
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    logger.error(f"500 Internal Server Error: {e}", exc_info=True)
+    return jsonify({
+        "error":   "Terjadi kesalahan di server",
+        "detail":  str(e),
+        "code":    500,
+    }), 500
+
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return jsonify({
+        "error": "Method tidak diizinkan",
+        "hint":  f"Gunakan {', '.join(e.valid_methods or [])}",
+        "code":  405,
+    }), 405
+
+
+@app.route("/api/update-check")
+def api_update_check():
+    """Check GitHub for a newer version."""
+    force = request.args.get("force", "false").lower() == "true"
+    if HAS_UPDATER:
+        result = check_update(force=force)
+        result["server_version"] = CURRENT_VERSION
+        return jsonify(result)
+    return jsonify({
+        "update_available": False,
+        "message": "Updater module tidak tersedia.",
+        "current_version": CURRENT_VERSION,
+    })
+
+
+@app.route("/api/i18n")
+def api_i18n():
+    """Return translation strings for the current language (for frontend use)."""
+    if not HAS_I18N:
+        return jsonify({"lang": "id", "strings": {}})
+    from safekid.i18n import TRANSLATIONS, _CURRENT_LANG
+    lang = request.args.get("lang", _CURRENT_LANG)
+    strings = TRANSLATIONS.get(lang, TRANSLATIONS["id"])
+    return jsonify({"lang": lang, "strings": strings})
+
+
 
 
 # ────────────────────────────────────────────────────
@@ -786,10 +864,23 @@ def main():
     
     STATE.lb_url        = args.lb_url     or get_conf("little_brother", "server_url", "http://localhost:5555")
     STATE.demo_mode     = args.demo or not HAS_REQUESTS
-    
-    # Load PIN Hash
-    # Priority: Config > Default Hash (1234)
+
+    # Load PIN Hash (Priority: Config > Default Hash of "1234")
     STATE.admin_pin_hash = get_conf("general", "admin_pin_hash", STATE.admin_pin_hash)
+
+    # Set language from config
+    lang = get_conf("general", "language", "id")
+    set_lang(lang)
+    logger.info(f"Language set to: {lang}")
+
+    # Background Update Check (non-blocking)
+    if HAS_UPDATER:
+        def _bg_update_check():
+            res = check_update()
+            if res.get("update_available"):
+                logger.info(f"[UPDATE] {res['message']}")
+        threading.Thread(target=_bg_update_check, daemon=True).start()
+
 
     # Init launcher
     if HAS_LAUNCHER and CATALOG_PATH.exists():
