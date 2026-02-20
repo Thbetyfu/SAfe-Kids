@@ -5,15 +5,64 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## [Unreleased — Week 5+]
+## [Unreleased — v0.8.0+]
 
 ### Planned
+- Screenshot real di README
 - Panduan orang tua (`docs/PARENT_GUIDE.md`)
 - Live USB ISO builder otomatis
 - Integrasi Little Brother penuh (online mode)
-- Tema UI tambahan (Ocean, Forest, Candy)
 
 ---
+
+## [0.7.0] — Priority 2 — Quality & Polish (2026-02-20)
+
+### Added
+- 🌐 **i18n (Internationalization)**: `safekid/i18n.py`
+  - 38 translation keys untuk Bahasa Indonesia & English
+  - `t("welcome", name="Budi")` → `"Halo, Budi!"`
+  - `set_lang("en")` untuk ganti bahasa global
+  - `/api/i18n?lang=en` endpoint untuk frontend
+  - Bahasa dibaca dari `config/safekid_default.conf → [general] language`
+- 🔄 **Auto-Update Checker**: `safekid/updater.py`
+  - Memeriksa GitHub Releases API untuk versi terbaru
+  - Cache 24 jam (`config/.update_cache`) — tidak spam API
+  - `/api/update-check` endpoint (tambah `?force=true` untuk paksa cek)
+  - Background thread saat startup — tidak memblokir server
+  - `_is_newer()` perbandingan versi semantik
+
+### Improved
+- 📋 **Logging**: Dual handler — console + `safekid.log` file
+  - Format lebih informatif: `%(levelname)-8s` aligned
+  - Tangkap semua error ke file untuk debugging
+- 🛡️ **Error Handlers**: JSON error responses untuk semua status
+  - `404` → JSON dengan hint endpoint yang valid
+  - `500` → JSON dengan detail error + log stack trace
+  - `405` → JSON dengan daftar method yang valid
+
+### Tests
+- `tests/test_i18n_updater.py`: 13 tests baru (total: **28 tests**)
+  - `TestI18n`: 8 tests — translation, fallback, bilingual key parity
+  - `TestUpdater`: 4 tests — version format, comparison, tuple parsing
+
+---
+
+## [0.6.0] — Priority 1 — Security & Polish (2026-02-20)
+
+### Added
+- 🔐 **Hashed PIN System**: SHA256 `hashlib`
+  - `hash_pin()` / `verify_pin()` helper
+  - `admin_pin` → `admin_pin_hash` di config
+  - `--setup` flag: wizard interaktif ganti PIN (disimpan ke config)
+- 📄 **LICENSE**: GPL-3.0 resmi dari gnu.org
+- 📦 **requirements-dev.txt**: pytest, pytest-cov, flake8, mypy, black
+
+### Fixed
+- 🪟 **UnicodeEncodeError**: Print banner menggunakan `_p()` helper ASCII-safe
+- 🐛 **apps_catalog.json**: Rebuild dari awal setelah rusak saat test toggle
+
+---
+
 
 ## [0.5.0] — Week 5 — Testing & Polish (2026-02-20)
 
