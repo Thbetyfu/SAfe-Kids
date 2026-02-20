@@ -103,6 +103,10 @@ class AppState:
         self.stars          = 0
         self.lb_url         = "http://localhost:5555"
         self.demo_mode      = True
+        # Analytics: last 7 days usage in minutes (ring buffer)
+        self.daily_usage    = [0] * 7   # index 0=today, 6=6 days ago
+        self.app_usage: dict = {}       # {app_id: minutes_total}
+        self.theme          = "space"   # active UI theme
         # SHA256 of "1234"
         self.admin_pin_hash = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
         self.activity_log   = []    # [{icon, name, time, app_id}]
@@ -750,6 +754,246 @@ def api_i18n():
     strings = TRANSLATIONS.get(lang, TRANSLATIONS["id"])
     return jsonify({"lang": lang, "strings": strings})
 
+
+# ────────────────────────────────────────────────────
+#  Analytics API (3.3)
+# ────────────────────────────────────────────────────
+
+@app.route("/api/analytics")
+def api_analytics():
+    """Return usage analytics for parent dashboard."""
+    pin = request.headers.get("X-SafeKid-PIN") or request.args.get("pin")
+    if not verify_pin(pin):
+        return jsonify({"error": "Wrong PIN"}), 403
+
+    with STATE._lock:
+        # Top apps by usage
+        top_apps = sorted(
+            [{"app_id": k, "name": k.replace("_", " ").title(), "minutes": v}
+             for k, v in STATE.app_usage.items()],
+            key=lambda x: x["minutes"], reverse=True
+        )[:5]
+
+        # Calculate average
+        total_7d = sum(STATE.daily_usage)
+        avg_daily = round(total_7d / 7, 1)
+
+        return jsonify({
+            "daily_usage_7d": list(reversed(STATE.daily_usage)),  # oldest first
+            "total_7d_minutes": total_7d,
+            "avg_daily_minutes": avg_daily,
+            "top_apps": top_apps,
+            "streak_days": STATE.streak_days,
+            "total_stars": STATE.stars,
+            "child_age": STATE.child_age,
+        })
+
+
+@app.route("/parent/analytics")
+def parent_analytics():
+    """Analytics dashboard page (PIN protected via JS)."""
+    return f"""<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analitik | SafeKid Flash</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ font-family: 'Segoe UI', sans-serif; background: #0f0c29; color: #fff; min-height: 100vh; padding: 24px; }}
+  h1 {{ font-size: 1.6rem; margin-bottom: 20px; color: #667eea; }}
+  .cards {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }}
+  .card {{ background: rgba(255,255,255,0.07); border-radius: 14px; padding: 18px; text-align: center; }}
+  .card .val {{ font-size: 2rem; font-weight: 700; color: #FFD93D; }}
+  .card .lbl {{ font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 4px; }}
+  .chart-box {{ background: rgba(255,255,255,0.06); border-radius: 14px; padding: 20px; margin-bottom: 20px; }}
+  .chart-box h3 {{ margin-bottom: 14px; font-size: 1rem; color: #aaa; }}
+  .pin-gate {{ text-align:center; margin-top: 80px; }}
+  .pin-gate input {{ padding: 10px 16px; border-radius: 8px; border: 1px solid #444; background: #1a1a2e; color: #fff; font-size: 1rem; margin-right: 8px; }}
+  .pin-gate button {{ padding: 10px 20px; border-radius: 8px; background: #667eea; border: none; color: #fff; cursor: pointer; }}
+  #main {{ display: none; }}
+  .back-btn {{ display: inline-block; margin-bottom: 16px; color: #667eea; text-decoration: none; font-size: 0.9rem; }}
+</style>
+</head>
+<body>
+<div id="pin-gate" class="pin-gate">
+  <h2 style="color:#667eea;margin-bottom:20px">Analitik SafeKid Flash</h2>
+  <input type="password" id="pinInput" placeholder="PIN Orang Tua" maxlength="8">
+  <button onclick="loadAnalytics()">Lihat Analitik</button>
+  <p id="pinErr" style="color:#FF6B6B;margin-top:10px"></p>
+</div>
+<div id="main">
+  <a href="/parent" class="back-btn">&#8592; Kembali ke Dashboard</a>
+  <h1>Analitik Penggunaan</h1>
+  <div class="cards" id="statCards"></div>
+  <div class="chart-box">
+    <h3>Penggunaan 7 Hari Terakhir (menit)</h3>
+    <canvas id="usageChart" height="80"></canvas>
+  </div>
+  <div class="chart-box">
+    <h3>Top 5 Aplikasi</h3>
+    <canvas id="appsChart" height="80"></canvas>
+  </div>
+</div>
+<script>
+let savedPin = '';
+const DAYS = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+function loadAnalytics() {{
+  savedPin = document.getElementById('pinInput').value;
+  fetch('/api/analytics', {{headers: {{'X-SafeKid-PIN': savedPin}}}})
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(d => renderDashboard(d))
+    .catch(e => document.getElementById('pinErr').textContent = e === 403 ? 'PIN salah' : 'Error: ' + e);
+}}
+
+function renderDashboard(d) {{
+  document.getElementById('pin-gate').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+
+  // Stat cards
+  const cards = [
+    ['Rata-rata/hari', d.avg_daily_minutes + ' min', '#667eea'],
+    ['Total 7 Hari', d.total_7d_minutes + ' min', '#FFD93D'],
+    ['Hari Berturut', d.streak_days, '#6BCB77'],
+    ['Total Bintang', d.total_stars, '#FF6B6B'],
+  ];
+  document.getElementById('statCards').innerHTML = cards.map(([l,v,c]) =>
+    `<div class="card"><div class="val" style="color:${{c}}">${{v}}</div><div class="lbl">${{l}}</div></div>`
+  ).join('');
+
+  // Daily usage chart
+  const today = new Date();
+  const labels = d.daily_usage_7d.map((_, i) => {{
+    const d2 = new Date(today);
+    d2.setDate(today.getDate() - (6 - i));
+    return DAYS[d2.getDay()];
+  }});
+  new Chart(document.getElementById('usageChart'), {{
+    type: 'bar',
+    data: {{
+      labels,
+      datasets: [{{
+        label: 'Menit',
+        data: d.daily_usage_7d,
+        backgroundColor: 'rgba(102,126,234,0.7)',
+        borderColor: '#667eea',
+        borderWidth: 2,
+        borderRadius: 6,
+      }}]
+    }},
+    options: {{
+      responsive: true,
+      plugins: {{ legend: {{ labels: {{ color: '#aaa' }} }} }},
+      scales: {{
+        x: {{ ticks: {{ color: '#aaa' }}, grid: {{ color: 'rgba(255,255,255,0.05)' }} }},
+        y: {{ ticks: {{ color: '#aaa' }}, grid: {{ color: 'rgba(255,255,255,0.05)' }} }}
+      }}
+    }}
+  }});
+
+  // Top apps chart
+  if (d.top_apps.length > 0) {{
+    new Chart(document.getElementById('appsChart'), {{
+      type: 'doughnut',
+      data: {{
+        labels: d.top_apps.map(a => a.name),
+        datasets: [{{
+          data: d.top_apps.map(a => a.minutes || 1),
+          backgroundColor: ['#667eea','#FFD93D','#6BCB77','#FF6B6B','#764ba2'],
+        }}]
+      }},
+      options: {{
+        responsive: true,
+        plugins: {{
+          legend: {{ labels: {{ color: '#aaa' }}, position: 'right' }}
+        }}
+      }}
+    }});
+  }}
+}}
+
+// Enter key support
+document.addEventListener('DOMContentLoaded', () => {{
+  document.getElementById('pinInput').addEventListener('keydown', e => {{
+    if (e.key === 'Enter') loadAnalytics();
+  }});
+}});
+</script>
+</body></html>"""
+
+
+# ────────────────────────────────────────────────────
+#  Theme API (3.1)
+# ────────────────────────────────────────────────────
+
+THEMES_DIR = HERE / "themes"
+VALID_THEMES = {"space", "ocean", "forest", "candy"}
+
+
+@app.route("/api/theme", methods=["GET", "POST"])
+def api_theme():
+    """GET current theme; POST to change theme (PIN required)."""
+    if request.method == "GET":
+        return jsonify({"theme": STATE.theme, "available": list(VALID_THEMES)})
+
+    data = request.get_json(silent=True) or {}
+    pin  = data.get("pin") or request.headers.get("X-SafeKid-PIN")
+    if not verify_pin(pin):
+        return jsonify({"error": "Wrong PIN"}), 403
+
+    new_theme = data.get("theme", "space")
+    if new_theme not in VALID_THEMES:
+        return jsonify({"error": f"Theme tidak valid. Pilihan: {list(VALID_THEMES)}"}), 400
+
+    STATE.theme = new_theme
+    logger.info(f"Theme changed to: {new_theme}")
+    return jsonify({"ok": True, "theme": new_theme})
+
+
+@app.route("/themes/<path:filename>")
+def serve_theme_file(filename):
+    """Serve CSS theme files."""
+    return send_from_directory(str(THEMES_DIR), filename)
+
+
+# ────────────────────────────────────────────────────
+#  PWA Routes (3.2)
+# ────────────────────────────────────────────────────
+
+STATIC_DIR = HERE / "static"
+
+
+@app.route("/static/manifest.json")
+def serve_manifest():
+    return send_from_directory(str(STATIC_DIR), "manifest.json",
+                               mimetype="application/manifest+json")
+
+
+@app.route("/static/<path:filename>")
+def serve_static(filename):
+    return send_from_directory(str(STATIC_DIR), filename)
+
+
+@app.route("/sw.js")
+def service_worker():
+    """Minimal service worker for PWA offline support."""
+    sw_content = """
+const CACHE = 'safekid-v1';
+const URLS  = ['/', '/api/status'];
+
+self.addEventListener('install', e =>
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(URLS)))
+);
+self.addEventListener('fetch', e =>
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request))
+  )
+);
+"""
+    from flask import Response
+    return Response(sw_content, mimetype="application/javascript")
 
 
 

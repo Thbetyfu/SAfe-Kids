@@ -1,0 +1,41 @@
+/* SafeKid Flash — Theme: OCEAN 🌊 */
+:root {
+    --bg-gradient-start: #0a4d68;
+    --bg-gradient-mid:   #088395;
+    --bg-gradient-end:   #05C3DD;
+    --accent-primary:    #00A9FF;
+    --accent-secondary:  #05C3DD;
+    --accent-yellow:     #FFC300;
+    --accent-green:      #00B4D8;
+    --accent-red:        #E63946;
+    --card-bg:           rgba(5, 195, 221, 0.08);
+    --card-border:       rgba(0, 169, 255, 0.22);
+    --card-hover-border: rgba(0, 169, 255, 0.55);
+    --card-hover-glow:   rgba(0, 169, 255, 0.18);
+    --text-primary:      #E0F8FF;
+    --text-secondary:    rgba(224, 248, 255, 0.6);
+    --timer-ring-bg:     rgba(0, 169, 255, 0.15);
+    --scrollbar-thumb:   rgba(0, 169, 255, 0.4);
+    --theme-name:        "ocean";
+}
+
+body {
+    background: linear-gradient(135deg,
+        var(--bg-gradient-start) 0%,
+        var(--bg-gradient-mid) 50%,
+        var(--bg-gradient-end) 100%
+    );
+}
+
+/* Floating bubbles for ocean feel */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 80%, rgba(0,169,255,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(5,195,221,0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(0,180,216,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}

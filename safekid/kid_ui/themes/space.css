@@ -1,0 +1,40 @@
+/* SafeKid Flash — Theme: SPACE ⭐ (default) */
+:root {
+    --bg-gradient-start: #0f0c29;
+    --bg-gradient-mid: #302b63;
+    --bg-gradient-end: #24243e;
+    --accent-primary: #667eea;
+    --accent-secondary: #764ba2;
+    --accent-yellow: #FFD93D;
+    --accent-green: #6BCB77;
+    --accent-red: #FF6B6B;
+    --card-bg: rgba(255, 255, 255, 0.06);
+    --card-border: rgba(255, 255, 255, 0.12);
+    --card-hover-border: rgba(102, 126, 234, 0.5);
+    --card-hover-glow: rgba(102, 126, 234, 0.15);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.55);
+    --timer-ring-bg: rgba(102, 126, 234, 0.15);
+    --scrollbar-thumb: rgba(102, 126, 234, 0.4);
+    --theme-name: "space";
+}
+
+body {
+    background: linear-gradient(135deg,
+            var(--bg-gradient-start) 0%,
+            var(--bg-gradient-mid) 50%,
+            var(--bg-gradient-end) 100%);
+}
+
+/* Stars effect for space */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(102, 126, 234, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 80%, rgba(118, 75, 162, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  safekid:
+    build: .
+    container_name: safekid-flash
+    restart: unless-stopped
+    ports:
+      - "5556:5556"
+    volumes:
+      - ./config:/app/config          # Persist config (PIN hash, settings)
+      - ./safekid.log:/app/safekid.log  # Persist log file
+    environment:
+      - SAFEKID_SECRET=${SAFEKID_SECRET:-changeme-in-production}
+      - FLASK_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5556/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# Usage:
+#   docker-compose up -d          # Start in background
+#   docker-compose logs -f        # View logs
+#   docker-compose down           # Stop
+#   docker-compose build --no-cache  # Rebuild image

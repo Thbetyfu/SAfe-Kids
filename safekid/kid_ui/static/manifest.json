@@ -1,0 +1,39 @@
+{
+    "name": "SafeKid Flash",
+    "short_name": "SafeKid",
+    "description": "Parental Control & Kid Launcher untuk anak-anak Indonesia",
+    "start_url": "/",
+    "scope": "/",
+    "display": "fullscreen",
+    "orientation": "any",
+    "background_color": "#0f0c29",
+    "theme_color": "#667eea",
+    "lang": "id",
+    "categories": [
+        "education",
+        "kids",
+        "parenting"
+    ],
+    "icons": [
+        {
+            "src": "/static/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Panel Orang Tua",
+            "short_name": "Parent",
+            "url": "/parent",
+            "description": "Kontrol waktu anak"
+        }
+    ]
+}
