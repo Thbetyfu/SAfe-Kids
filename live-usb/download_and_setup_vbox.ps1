@@ -38,8 +38,8 @@ if ($process.ExitCode -eq 0 -or $process.ExitCode -eq 3010) {
 }
 
 # --- 3. DOWNLOAD LINUX MINT XFCE ISO ---
-# Menggunakan Mirror lokal Datautama / BIZNET supaya cepat
-$isoUrl = "http://kartolo.sby.datautama.net.id/linuxmint/iso/stable/21.3/linuxmint-21.3-xfce-64bit.iso"
+# Menggunakan Mirror kernel.org yang lebih stabil
+$isoUrl = "https://mirrors.edge.kernel.org/linuxmint/stable/21.3/linuxmint-21.3-xfce-64bit.iso"
 $isoFile = "$workspaceDir\linuxmint-21.3-xfce-64bit.iso"
 
 if (-Not (Test-Path $isoFile)) {
